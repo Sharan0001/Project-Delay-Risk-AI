@@ -29,10 +29,12 @@ export function History() {
     const { data, isLoading, error } = useHistory(50);
     const loadAnalysis = useLoadAnalysis();
 
-    // Format timestamp for display
+    // Format timestamp for display - convert UTC to local timezone
     const formatDate = (timestamp: string): string => {
-        const date = new Date(timestamp);
-        return date.toLocaleString('en-US', {
+        // Ensure the timestamp is treated as UTC if no timezone specified
+        const utcTimestamp = timestamp.endsWith('Z') ? timestamp : timestamp + 'Z';
+        const date = new Date(utcTimestamp);
+        return date.toLocaleString(undefined, {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
