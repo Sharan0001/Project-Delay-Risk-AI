@@ -48,7 +48,11 @@ Domain-expert knowledge is encoded as explicit rules, not hidden inside an ML mo
 
 ### ML as a Supplementary Signal
 
-Machine learning (logistic regression) estimates delay probability based on historical patterns. However, ML does not override rules—it supplements them. The final score is a weighted combination: **60% rule-based, 40% ML-based**.
+Two machine learning models are available:
+- **Logistic Regression** (default): Linear, fully interpretable coefficients
+- **Random Forest**: Non-linear, captures complex patterns, feature importance via impurity reduction
+
+However, ML does not override rules—it supplements them. The final score is a weighted combination: **60% rule-based, 40% ML-based**.
 
 ### Determinism Over Randomness
 
@@ -84,8 +88,12 @@ Extracts task-level signals from event logs:
 ### 4. Rules Engine (`models/rules.py`)
 Evaluates 5 domain rules against task features. Each rule has a threshold, score contribution (0-25 points), severity level, and human-readable reason. Total rule score caps at 100.
 
-### 5. ML Model (`models/ml_model.py`)
-Logistic regression trained on simulated labeled data. Outputs a delay probability (0.0–1.0). Coefficients are inspectable for directional feature contribution.
+### 5. ML Models (`models/ml_model.py`)
+Two interchangeable models with the same interface:
+- **DelayRiskModel**: Logistic regression with standardization pipeline. Coefficients provide directional feature impact.
+- **DelayRiskRFModel**: Random Forest (200 trees, max depth 6). Feature importance via impurity reduction.
+
+Both output delay probability (0.0–1.0) and support train/predict/evaluate/save/load operations.
 
 ### 6. Hybrid Risk Scoring (`models/hybrid_risk.py`)
 Combines rule score and ML probability using a weighted formula:
@@ -95,7 +103,10 @@ final_score = 0.6 × rule_score + 0.4 × (ml_probability × 100)
 Thresholds classify into High (≥70), Medium (≥40), Low (<40).
 
 ### 7. Decision Support (`decision_support/`)
-Maps triggered risk signals to prioritized action recommendations. Actions inherit thresholds from rules to ensure consistency.
+Three sub-modules:
+- **actions.py**: Maps triggered risk signals to prioritized action recommendations
+- **explain.py**: Generates human-readable explanations combining rules + ML feature importance
+- **what_if.py**: Counterfactual simulation engine with three scenarios
 
 ### 8. API Layer (`backend/`)
 FastAPI application exposing endpoints for analysis, history, statistics, and Prometheus metrics. Includes optional API key authentication and rate limiting.
@@ -117,14 +128,13 @@ Every triggered rule is surfaced with:
 - Underlying rationale
 
 ### ML Feature Contribution
-The logistic regression coefficients indicate which features increase or decrease predicted delay probability. This is displayed directionally (positive/negative impact).
+Model coefficients (Logistic Regression) or feature importance (Random Forest) indicate which features increase or decrease predicted delay probability. The explain module formats this directionally (e.g., "total_blocked_events increases risk").
 
 ### What-If Scenario Analysis
-Four simulation scenarios mutate feature values to estimate risk reduction:
-- Add resources → Zeroes `no_resource_available`
-- Remove dependencies → Halves `dependencies`
-- Prevent rework → Zeroes `rework_count`
-- Resolve blockers → Zeroes all blocking counts
+Three simulation scenarios mutate feature values to estimate risk reduction:
+- **Add Resource**: Reduces `no_resource_available` and `total_blocked_events`
+- **Reduce Dependencies**: Decreases dependency-related blocks and coupling overhead
+- **Improve Process**: Reduces `rework_count` and `max_progress_gap`
 
 Each task shows a before/after comparison with percentage reduction.
 
