@@ -29,11 +29,20 @@ export function Dashboard() {
     const { data: stats, isLoading: statsLoading } = useStats();
     const { runAnalysis, isLoading: analysisLoading } = useAnalysis();
 
-    // Format last analysis time
+    // Format last analysis time - convert UTC to local timezone
     const formatLastAnalysis = (timestamp: string | null): string => {
         if (!timestamp) return 'Never';
-        const date = new Date(timestamp);
-        return date.toLocaleString();
+        // Ensure the timestamp is treated as UTC if no timezone specified
+        const utcTimestamp = timestamp.endsWith('Z') ? timestamp : timestamp + 'Z';
+        const date = new Date(utcTimestamp);
+        return date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
     };
 
     // Handle run analysis
