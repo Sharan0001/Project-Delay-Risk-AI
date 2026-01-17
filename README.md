@@ -70,7 +70,7 @@ The frontend deliberately avoids chart-heavy dashboards. The goal is a task-leve
 
 ## Architecture Overview
 
-The system consists of seven interconnected modules:
+The system consists of multiple interconnected modules:
 
 ### 1. Simulator (`project_simulator/`)
 Generates synthetic project data: tasks, events (progress, blocks, rework), and configurable disruption patterns. Uses a controllable random seed for reproducibility.
