@@ -7,6 +7,6 @@ name = "project-delay-risk-ai"
 version = "0.1.0"
 
 [tool.setuptools]
-packages = ["project_simulator", "data_pipeline", "models", "decision_support", "backend", "frontend"]
+packages = ["project_simulator", "data_pipeline", "models", "decision_support", "backend"]
 
 
