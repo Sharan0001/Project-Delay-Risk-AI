@@ -1,0 +1,14 @@
+simulation:
+  seed: 42
+  max_days: 120
+
+risk_weights:
+  rule_weight: 0.6
+  ml_weight: 0.4
+
+risk_thresholds:
+  high: 70
+  medium: 40
+
+model:
+  type: random_forest   # options: logistic, random_forest
